@@ -1,7 +1,10 @@
 #!/bin/bash
 
+cd /opt/mitmoutput
+
 # Start conversion, grabbing all params given
 echo "Starting conversion..."
+
 /usr/bin/mitmdump $@
 
 echo "Conversion complete - reporting to EtcD."
