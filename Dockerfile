@@ -15,6 +15,9 @@ RUN [ "cross-build-end" ]
 
 FROM quay.io/realeyes/mitmproxy-rpi3:4.0.3
 
+ENV ETCDCTL_API 3
+ENV ETCDCTL_ENDPOINTS http://127.0.0.1:2379
+
 RUN [ "cross-build-start" ]
 
 COPY --from=etcd /usr/local/bin/etcdctl /usr/local/bin/etcdctl
@@ -28,11 +31,13 @@ COPY cmd.sh ./cmd.sh
 RUN cat cmd.sh
 RUN chmod +x *.sh
 
-WORKDIR /app
+VOLUME /opt/mitmoutput
+
+WORKDIR /opt/mitmoutput
 
 RUN [ "cross-build-end" ]
 
 # Entrypoint runs cmd.sh for launching MITMDump and EtcD remote logger
 ENTRYPOINT [ "/opt/scripts/entrypoint.sh" ]
 
-CMD [ "-ns", "/opt/mitmaddons/charles_har_dump.py", "-r", "/path/to/file", "--set", "hardump=file.har" ]
+CMD [ "-ns", "/opt/mitmaddons/charles_har_dump.py", "-r", "/opt/mitmoutput/filetoconvert", "--set", "hardump=filetoconvert.har" ]
