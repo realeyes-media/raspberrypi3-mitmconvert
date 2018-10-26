@@ -1,0 +1,28 @@
+FROM quay.io/coreos/etcd:v3.3.9 as builder
+ENV ETCD_TAG v3.3.9
+
+
+FROM quay.io/realeyes/intel-nuc-mitmproxy:4.0.3
+
+ENV ETCDCTL_API 3
+ENV ETCDCTL_ENDPOINTS http://127.0.0.1:2379
+
+COPY --from=etcd /usr/local/bin/etcdctl /usr/local/bin/etcdctl
+
+WORKDIR /opt/scripts
+
+COPY entrypoint.sh ./entrypoint.sh
+RUN cat entrypoint.sh
+
+COPY cmd.sh ./cmd.sh
+RUN cat cmd.sh
+RUN chmod +x *.sh
+
+VOLUME /opt/mitmoutput
+
+WORKDIR /opt/mitmoutput
+
+# Entrypoint runs cmd.sh for launching MITMDump and EtcD remote logger
+ENTRYPOINT [ "/opt/scripts/entrypoint.sh" ]
+
+CMD [ "-ns", "/opt/mitmaddons/charles_har_dump.py", "-r", "/opt/mitmoutput/filetoconvert", "--set", "hardump=filetoconvert.har" ]
